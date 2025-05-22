@@ -4,20 +4,34 @@
   become: yes
 
   tasks:
-    - name: update apt cache
+    - name: Update apt cache en upgrade alle packages
       ansible.builtin.apt:
-              update_cache: true
-              name: "*"
-              state: latest
+        update_cache: true
+        name: "*"
+        state: latest
 
-    - name: ESX host toevoegen aan /etc/hosts
+    - name: Voeg ESX host toe aan /etc/hosts
       ansible.builtin.lineinfile:
         path: /etc/hosts
         line: "192.168.20.14 esxi"
         create: yes
-  
-  tasks:
-    - name: Voeg user test toe
+
+    - name: Voeg user 'test' toe
       ansible.builtin.user:
         name: test
         state: present
+
+    - name: Kopieer lokaal bestand naar guest
+      ansible.builtin.copy:
+        src: ./main.tf      
+        dest: /tmp/main.tf   
+        mode: '0644'
+
+    - name: Voeg cronjob toe voor dagelijkse backup naar /tmp
+      ansible.builtin.cron:
+        name: "Dagelijkse backup naar /tmp"
+        user: root
+        state: present
+        minute: "0"
+        hour: "2"
+        job: "mkdir -p /tmp/backup && cp -a /etc /tmp/backup/ && cp -a /var/www/ /tmp/backup/"
