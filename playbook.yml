@@ -1,4 +1,3 @@
----
 - name: Update alle packages op guest
   hosts: all
   become: yes
@@ -35,3 +34,36 @@
         minute: "0"
         hour: "2"
         job: "mkdir -p /tmp/backup && cp -a /etc /tmp/backup/ && cp -a /var/www/ /tmp/backup/"
+
+- name: Installeer nginx op webservers
+  hosts: webserver
+  become: yes
+
+  tasks:
+    - name: Installeer nginx
+      ansible.builtin.apt:
+        name: nginx
+        state: present
+
+    - name: Start en enable nginx service
+      ansible.builtin.service:
+        name: nginx 
+        state: started
+        enabled: yes    
+
+- name: Installeer mariadb op databaseservers
+  hosts: databaseservers
+  become: yes
+
+  tasks:
+    - name: Installeer mariadb-server
+      ansible.builtin.apt:
+        name: mariadb-server
+        state: present
+
+    - name: Start en enable mariadb service
+      ansible.builtin.service:
+        name: mariadb 
+        state: started
+        enabled: yes
+    
