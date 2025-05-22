@@ -15,7 +15,7 @@ provider "esxi" {
   esxi_password = var.esxi_password
 }
 
-#Web servers
+# Web server
 resource "esxi_guest" "webserver" {
   count        = 1
   guest_name   = "LES03webserver-${count.index + 1}"
@@ -28,9 +28,25 @@ resource "esxi_guest" "webserver" {
   network_interfaces {
     virtual_network = "VM Network"
   }
-    guestinfo = {
+
+  guestinfo = {
     "userdata"          = filebase64("cloud-config.yml")
     "userdata.encoding" = "base64"
   }
 }
+
+#Generate Ansible invetory file
+resource "null_resource" "generate_ansible_inventory" {
+  provisioner "local-exec" {
+    command = <<EOT
+echo "[webserver]" > ansible_inventory.ini
+%{ for ip in esxi_guest.webserver[*].ip_address ~}
+echo "${ip} ansible_user=ubuntu ansible_ssh_private_key_file=~/.ssh/id_rsa" >> ansible_inventory.ini
+%{ endfor ~}
+EOT
+  }
+
+  depends_on = [esxi_guest.webserver]
+}
+
 
