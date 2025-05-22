@@ -1,0 +1,27 @@
+- name: Backup alle vms op Proxmox
+  hosts: localhost
+  gather_facts: false
+  collections:
+    - community.general
+
+  tasks:
+    - name: Lijst van guests
+      community.general.proxmox:
+        api_user: test@pam
+        api_password: test
+        api_host: node1
+        vmid: -1
+        state: current
+      register: all_vms
+
+    - name: Start backup
+      community.general.proxmox_backup:
+        api_user: test@pam
+        api_password: test
+        api_host: node1
+        vmid: "{{ item.vmid }}"
+        storage: backup_vm
+        mode: snapshot
+        compress: zstd
+      loop: "{{ all_vms.virtual_machines }}"
+      when: item.type == 'qemu'
