@@ -35,13 +35,13 @@ resource "esxi_guest" "webserver" {
   }
 }
 
-#Generate Ansible invetory file
+#Generate Ansible invetory file (IP, user & SSH key)
 resource "null_resource" "generate_ansible_inventory" {
   provisioner "local-exec" {
     command = <<EOT
-echo "[webserver]" > ansible_inventory.ini
+echo "[webserver]" > inventory.ini
 %{ for ip in esxi_guest.webserver[*].ip_address ~}
-echo "${ip} ansible_user=ubuntu ansible_ssh_private_key_file=~/.ssh/id_rsa" >> ansible_inventory.ini
+echo "${ip} ansible_user=student ansible_ssh_private_key_file=~/.ssh/iac" >> ansible_inventory.ini
 %{ endfor ~}
 EOT
   }
