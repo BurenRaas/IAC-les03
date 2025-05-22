@@ -17,7 +17,7 @@ provider "esxi" {
 
 # Web server
 resource "esxi_guest" "webserver" {
-  count        = 1
+  count        = 2
   guest_name   = "LES03webserver-${count.index + 1}"
   disk_store   = "DS01"
   ovf_source   = "https://cloud-images.ubuntu.com/releases/24.04/release/ubuntu-24.04-server-cloudimg-amd64.ova"
@@ -41,7 +41,7 @@ resource "null_resource" "generate_ansible_inventory" {
     command = <<EOT
 echo "[webserver]" > inventory.ini
 %{ for ip in esxi_guest.webserver[*].ip_address ~}
-echo "${ip} ansible_user=student ansible_ssh_private_key_file=~/.ssh/iac" >> ansible_inventory.ini
+echo "${ip} ansible_user=student ansible_ssh_private_key_file=~/.ssh/iac" >> inventory.ini
 %{ endfor ~}
 EOT
   }

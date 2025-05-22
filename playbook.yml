@@ -1,0 +1,23 @@
+---
+- name: Update alle packages op guest
+  hosts: all
+  become: yes
+
+  tasks:
+    - name: update apt cache
+      ansible.builtin.apt:
+              update_cache: true
+              name: "*"
+              state: latest
+
+    - name: ESX host toevoegen aan /etc/hosts
+      ansible.builtin.lineinfile:
+        path: /etc/hosts
+        line: "192.168.20.14 esxi"
+        create: yes
+  
+  tasks:
+    - name: Voeg user test toe
+      ansible.builtin.user:
+        name: test
+        state: present
